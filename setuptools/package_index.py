@@ -43,8 +43,6 @@ __all__ = [
     'interpret_distro_name',
 ]
 
-_SOCKET_TIMEOUT = 15
-
 _tmpl = "setuptools/{setuptools.__version__} Python-urllib/{py_major}"
 user_agent = _tmpl.format(py_major=sys.version[:3], setuptools=setuptools)
 
@@ -955,21 +953,6 @@ def htmldecode(text):
     return entity_sub(decode_entity, text)
 
 
-def socket_timeout(timeout=15):
-    def _socket_timeout(func):
-        def _socket_timeout(*args, **kwargs):
-            old_timeout = socket.getdefaulttimeout()
-            socket.setdefaulttimeout(timeout)
-            try:
-                return func(*args, **kwargs)
-            finally:
-                socket.setdefaulttimeout(old_timeout)
-
-        return _socket_timeout
-
-    return _socket_timeout
-
-
 def _encode_auth(auth):
     """
     A function compatible with Python 2.3-3.3 that will encode
@@ -1091,10 +1074,6 @@ def open_with_auth(url, opener=urllib.request.urlopen):
             fp.url = urllib.parse.urlunparse(parts)
 
     return fp
-
-
-# adding a timeout to avoid freezing package_index
-open_with_auth = socket_timeout(_SOCKET_TIMEOUT)(open_with_auth)
 
 
 def fix_sf_url(url):
